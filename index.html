@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Whiteboard Chia Sẻ - Nâng Cao</title>
+  <title>Whiteboard Chia Sẻ - Animation Frame by Frame</title>
   <style>
     :root {
       --bg-main: #0f172a;
@@ -57,14 +57,12 @@
     .badge-blue  { background: rgba(56,189,248,0.2); color: var(--accent-blue); }
     .badge-amber { background: rgba(245,158,11,0.2); color: var(--accent-amber); }
     .badge-red   { background: rgba(239,68,68,0.18); color: var(--accent-red); }
+    .badge-purple{ background: rgba(168,85,247,0.2); color: var(--accent-purple); }
 
-    /* ---------- Bảng (table) ---------- */
     .table-wrap {
-      max-height: 190px;
-      overflow: auto;
+      max-height: 190px; overflow: auto;
       border: 1px solid var(--border-color);
-      border-radius: 6px;
-      background: #0f172a;
+      border-radius: 6px; background: #0f172a;
     }
     .data-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
     .data-table th {
@@ -84,7 +82,6 @@
     }
     .who { color: var(--accent-blue); font-weight: 600; }
 
-    /* ---------- Công cụ ---------- */
     .tool-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.4rem; margin-bottom: 0.9rem; }
     .tool-btn {
       background: #0f172a; border: 1px solid var(--border-color); color: var(--text-main);
@@ -117,10 +114,7 @@
     }
     .size-btn.active { border-color: var(--accent-blue); color: var(--accent-blue); background: rgba(56,189,248,0.12); }
 
-    .mini-label {
-      font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 0.35rem;
-    }
-
+    .mini-label { font-size: 0.75rem; color: var(--text-muted); display: block; margin-bottom: 0.35rem; }
     .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
 
     .btn {
@@ -129,22 +123,10 @@
       transition: filter .15s ease;
     }
     .btn:hover { filter: brightness(1.1); }
-    .btn-ghost {
-      background: #0f172a; color: var(--text-main);
-      border: 1px solid var(--border-color);
-    }
+    .btn-ghost { background: #0f172a; color: var(--text-main); border: 1px solid var(--border-color); }
     .btn-danger { background: var(--accent-red); color: #fff; }
     .btn-green  { background: var(--accent-green); color: #04210f; }
-
-    .canvas-container {
-      background: #090d16; border: 1px solid var(--border-color);
-      border-radius: 8px; padding: 0.5rem; flex: 1;
-    }
-    canvas.drawing-canvas {
-      display: block; width: 100%; height: auto; aspect-ratio: 1000 / 600;
-      background: #fff; border-radius: 6px; cursor: crosshair;
-      touch-action: none;
-    }
+    .btn-purple { background: var(--accent-purple); color: #fff; }
 
     .muted { color: var(--text-muted); }
     input[type="text"] {
@@ -161,16 +143,111 @@
 
     .log-box {
       background: #090d16; border: 1px solid var(--border-color); border-radius: 6px;
-      padding: 0.6rem 0.75rem; height: 150px; overflow-y: auto;
+      padding: 0.6rem 0.75rem; height: 130px; overflow-y: auto;
       font-family: ui-monospace, monospace; font-size: 0.72rem; color: #dbeafe;
     }
     .log-line { margin-bottom: 0.22rem; word-break: break-word; }
+
+    /* ===== Canvas + Onion skin ===== */
+    .canvas-container {
+      background: #090d16; border: 1px solid var(--border-color);
+      border-radius: 8px; padding: 0.5rem;
+    }
+    .canvas-stack {
+      position: relative;
+      width: 100%;
+      background: #fff;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .drawing-canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      aspect-ratio: 1000 / 600;
+      background: #fff;
+      cursor: crosshair;
+      touch-action: none;
+    }
+    .onion-ghost {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .2s ease;
+      border-radius: 6px;
+      filter: sepia(1) hue-rotate(170deg) saturate(3);
+    }
+    .onion-ghost.visible { opacity: 0.32; }
+
+    /* ===== Frame strip ===== */
+    .frame-strip-wrap {
+      margin-top: 0.9rem;
+      padding: 0.75rem;
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+    .frame-controls {
+      display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;
+      margin-bottom: 0.65rem;
+      font-size: 0.78rem;
+    }
+    .frame-controls button {
+      background: #1e293b; border: 1px solid var(--border-color);
+      color: var(--text-main); border-radius: 6px;
+      padding: 0.4rem 0.7rem; cursor: pointer; font-size: 0.75rem;
+      transition: all .15s ease;
+    }
+    .frame-controls button:hover { border-color: var(--accent-blue); }
+    .frame-controls button.active {
+      background: rgba(56,189,248,0.15); border-color: var(--accent-blue);
+      color: var(--accent-blue);
+    }
+    .frame-controls button.play { background: var(--accent-green); color: #04210f; border-color: var(--accent-green); font-weight: 700; }
+    .frame-controls button.play:hover { filter: brightness(1.1); }
+    .frame-controls button.stop { background: var(--accent-red); color: #fff; border-color: var(--accent-red); font-weight: 700; }
+    .frame-controls input[type="number"] {
+      width: 54px; padding: 0.25rem 0.3rem; background: #0f172a; color: var(--text-main);
+      border: 1px solid var(--border-color); border-radius: 4px; font-size: 0.75rem;
+    }
+    .frame-controls label { display: flex; align-items: center; gap: 0.3rem; }
+    .frame-controls label input[type="checkbox"] { accent-color: var(--accent-blue); }
+
+    .frame-strip {
+      display: flex; gap: 0.5rem; overflow-x: auto;
+      padding: 0.2rem 0.1rem 0.4rem;
+      scrollbar-width: thin;
+    }
+    .frame-thumb {
+      position: relative; flex: 0 0 auto;
+      width: 110px; height: 66px;
+      border: 2px solid var(--border-color);
+      border-radius: 6px; overflow: hidden;
+      cursor: pointer; background: #fff;
+      transition: all .15s ease;
+    }
+    .frame-thumb:hover { border-color: var(--accent-blue); transform: translateY(-1px); }
+    .frame-thumb.active {
+      border-color: var(--accent-blue);
+      box-shadow: 0 0 0 2px rgba(56,189,248,0.45);
+    }
+    .frame-thumb img { width: 100%; height: 100%; object-fit: contain; display: block; background: #fff; }
+    .frame-thumb span {
+      position: absolute; bottom: 3px; right: 4px;
+      background: rgba(0,0,0,0.75); color: #fff;
+      font-size: 0.62rem; padding: 1px 5px; border-radius: 8px;
+      font-weight: 600;
+    }
+    .frame-thumb.active span { background: var(--accent-blue); color: #04121f; }
   </style>
 </head>
 <body>
   <header>
-    <div class="header-title">🌐 Whiteboard Chia Sẻ — Nâng Cao</div>
-    <div class="header-sub">Nhiều màu • Công cụ vẽ nâng cao • Bảng thao tác &amp; bảng client • Đồng bộ qua BroadcastChannel</div>
+    <div class="header-title">🌐 Whiteboard Animation — Frame by Frame</div>
+    <div class="header-sub">Vẽ từng frame • Onion skin • Phát hoạt hình • Đồng bộ qua BroadcastChannel</div>
   </header>
 
   <main>
@@ -179,7 +256,6 @@
       <!-- ================= SIDEBAR ================= -->
       <div>
 
-        <!-- Trạng thái -->
         <div class="card">
           <div class="card-title">
             <span>Trạng thái</span>
@@ -188,35 +264,28 @@
           <p class="muted" style="font-size:0.75rem; margin-bottom:0.35rem;">
             Client: <strong id="myClientId" style="color:var(--accent-blue);">Client_You</strong>
           </p>
-          <p class="muted" style="font-size:0.75rem;">
-            Mở cùng link ở nhiều tab/trình duyệt để vẽ đồng bộ.
-          </p>
+          <p class="muted" style="font-size:0.75rem;">Phím tắt: Space = Phát/Dừng • B/E/L/R/C/S = công cụ</p>
         </div>
 
-        <!-- BẢNG 1: Danh sách client -->
         <div class="card">
           <div class="card-title">
             <span>Bảng client</span>
             <span id="clientCountBadge" class="badge badge-blue">1 Online</span>
           </div>
-          <div class="table-wrap" style="max-height:150px;">
+          <div class="table-wrap" style="max-height:130px;">
             <table class="data-table">
-              <thead>
-                <tr><th>Client</th><th>Trạng thái</th></tr>
-              </thead>
+              <thead><tr><th>Client</th><th>Trạng thái</th></tr></thead>
               <tbody id="clientTableBody"></tbody>
             </table>
           </div>
         </div>
 
-        <!-- Thêm người -->
         <div class="card">
           <div class="card-title"><span>Thêm người</span></div>
           <input id="userNameInput" type="text" placeholder="Nhập tên người..." />
           <button class="btn" style="width:100%;" onclick="addUserFromInput()">+ Thêm người</button>
         </div>
 
-        <!-- Công cụ vẽ -->
         <div class="card">
           <div class="card-title"><span>Công cụ vẽ</span><span class="badge badge-amber" id="toolBadge">Bút</span></div>
 
@@ -258,24 +327,23 @@
           </div>
           <div class="action-row">
             <button class="btn btn-green" onclick="downloadPNG()">⬇ Tải PNG</button>
-            <button class="btn btn-danger" onclick="clearBoard()">🗑 Xóa bảng</button>
+            <button class="btn btn-danger" onclick="clearBoard()">🗑 Xóa frame</button>
           </div>
         </div>
 
-        <!-- BẢNG 2: Lịch sử thao tác -->
         <div class="card">
           <div class="card-title">
             <span>Bảng thao tác</span>
             <span class="badge badge-purple" id="actionCount">0</span>
           </div>
-          <div class="table-wrap" style="max-height:200px;">
+          <div class="table-wrap" style="max-height:180px;">
             <table class="data-table">
               <thead>
                 <tr>
-                  <th style="width:64px;">Giờ</th>
+                  <th style="width:60px;">Giờ</th>
                   <th>Client</th>
                   <th>Thao tác</th>
-                  <th style="width:32px;">Màu</th>
+                  <th style="width:30px;">Màu</th>
                 </tr>
               </thead>
               <tbody id="actionTableBody"></tbody>
@@ -285,21 +353,44 @@
                   onclick="clearActionTable()">Xóa bảng thao tác</button>
         </div>
 
-        <!-- Nhật ký -->
         <div class="card">
           <div class="card-title"><span>Nhật ký mạng</span></div>
           <div class="log-box" id="netLogs"></div>
         </div>
       </div>
 
-      <!-- ================= CANVAS ================= -->
+      <!-- ================= CANVAS + ANIMATION ================= -->
       <div class="card" style="display:flex; flex-direction:column;">
         <div class="card-title">
-          <span>Bảng vẽ</span>
-          <span class="badge badge-green">Share via link</span>
+          <span>Bảng vẽ — Animation</span>
+          <span class="badge badge-purple" id="frameBadge">Frame 1/1</span>
         </div>
+
         <div class="canvas-container">
-          <canvas id="whiteboard" class="drawing-canvas" width="1000" height="600"></canvas>
+          <div class="canvas-stack">
+            <canvas id="whiteboard" class="drawing-canvas" width="1000" height="600"></canvas>
+            <img id="onionGhost" class="onion-ghost" alt="" />
+          </div>
+        </div>
+
+        <div class="frame-strip-wrap">
+          <div class="frame-controls">
+            <button class="play" id="btnPlay" onclick="play()">▶ Phát</button>
+            <button class="stop" id="btnStop" onclick="stopPlayback()" style="display:none;">⏸ Dừng</button>
+            <button onclick="prevFrame()">⏮ Trước</button>
+            <button onclick="nextFrame()">⏭ Sau</button>
+            <label>FPS
+              <input type="number" id="fpsInput" value="12" min="1" max="30" />
+            </label>
+            <label>
+              <input type="checkbox" id="onionToggle" checked /> Onion skin
+            </label>
+            <span style="flex:1;"></span>
+            <button onclick="addFrame(false)">+ Frame</button>
+            <button onclick="addFrame(true)">⧉ Nhân bản</button>
+            <button onclick="deleteFrame()" style="color:#ef4444; border-color:rgba(239,68,68,0.5);">🗑 Frame</button>
+          </div>
+          <div class="frame-strip" id="frameStrip"></div>
         </div>
       </div>
 
@@ -308,7 +399,7 @@
 
   <script>
   /* =========================================================
-     0. KHỞI TẠO & HẰNG SỐ
+     0. KHỞI TẠO
      ========================================================= */
   const ROOM = 'whiteboard-room';
   const bc = ('BroadcastChannel' in window) ? new BroadcastChannel(ROOM) : null;
@@ -316,23 +407,21 @@
   document.getElementById('myClientId').textContent = myId;
 
   const $ = (id) => document.getElementById(id);
-
   const canvas = $('whiteboard');
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  const W = canvas.width;   // 1000
-  const H = canvas.height;  // 600
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  const H = canvas.height;
 
-  /* Trạng thái vẽ */
   let tool = 'pen';
   let currentColor = '#0f172a';
   let brushSize = 4;
   let fillShapeOn = false;
   let painting = false;
   let startX = 0, startY = 0, lastX = 0, lastY = 0;
-  let snapshot = null;               // ảnh chụp để preview hình
+  let snapshot = null;
   const undoStack = [];
   const redoStack = [];
-  const MAX_HISTORY = 25;
+  const MAX_HISTORY = 20;
 
   const PALETTE = [
     '#0f172a', '#ffffff', '#64748b', '#ef4444',
@@ -342,7 +431,7 @@
   ];
 
   /* =========================================================
-     1. TIỆN ÍCH BẢNG / LOG
+     1. LOG + BẢNG THAO TÁC
      ========================================================= */
   function logNet(msg) {
     const logs = $('netLogs');
@@ -366,7 +455,7 @@
       `<td>${action}</td>` +
       `<td><span class="dot" style="background:${c}"></span></td>`;
     tbody.appendChild(tr);
-    while (tbody.children.length > 60) tbody.removeChild(tbody.firstChild);
+    while (tbody.children.length > 80) tbody.removeChild(tbody.firstChild);
     $('actionCount').textContent = tbody.children.length;
     const wrap = tbody.closest('.table-wrap');
     if (wrap) wrap.scrollTop = wrap.scrollHeight;
@@ -378,7 +467,7 @@
   }
 
   /* =========================================================
-     2. DANH SÁCH CLIENT (BẢNG)
+     2. BẢNG CLIENT
      ========================================================= */
   const activeClients = new Map();
   activeClients.set(myId, { id: myId, status: 'Đang hoạt động' });
@@ -388,7 +477,6 @@
     if (!tbody) return;
     tbody.innerHTML = '';
     $('clientCountBadge').textContent = activeClients.size + ' Online';
-
     activeClients.forEach((client, id) => {
       const tr = document.createElement('tr');
       tr.innerHTML =
@@ -465,15 +553,11 @@
     ctx.lineWidth = size;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    if (filled && shape !== 'line') {
-      ctx.fillStyle = color;
-      ctx.fill();
-    }
+    if (filled && shape !== 'line') { ctx.fillStyle = color; ctx.fill(); }
     ctx.stroke();
     ctx.closePath();
   }
 
-  /* Bình xịt: vẽ ngẫu nhiên nhiều điểm quanh vị trí */
   function spray(x, y, color, size) {
     const radius = Math.max(size, 6);
     const count = Math.min(30, 6 + size);
@@ -485,9 +569,6 @@
     }
   }
 
-  /* =========================================================
-     4. TOẠ ĐỘ (đã sửa lỗi lệch do CSS scale)
-     ========================================================= */
   function getPos(e) {
     const rect = canvas.getBoundingClientRect();
     return {
@@ -497,17 +578,18 @@
   }
 
   /* =========================================================
-     5. LỊCH SỬ (UNDO / REDO)
+     4. UNDO / REDO
      ========================================================= */
   function pushHistory() {
     try {
       undoStack.push(ctx.getImageData(0, 0, W, H));
       if (undoStack.length > MAX_HISTORY) undoStack.shift();
       redoStack.length = 0;
-    } catch (err) { /* bỏ qua */ }
+    } catch (e) {}
   }
 
   function undo() {
+    if (isPlaying) return;
     if (!undoStack.length) { logNet('Không còn thao tác để hoàn tác.'); return; }
     redoStack.push(ctx.getImageData(0, 0, W, H));
     ctx.putImageData(undoStack.pop(), 0, 0);
@@ -517,6 +599,7 @@
   }
 
   function redo() {
+    if (isPlaying) return;
     if (!redoStack.length) { logNet('Không còn thao tác để làm lại.'); return; }
     undoStack.push(ctx.getImageData(0, 0, W, H));
     ctx.putImageData(redoStack.pop(), 0, 0);
@@ -526,13 +609,237 @@
   }
 
   /* =========================================================
-     6. ĐỒNG BỘ
+     5. FRAME STATE
+     ========================================================= */
+  let frames = [];              // [{ url, img? }]
+  let currentFrameIndex = 0;
+  let isPlaying = false;
+  let playInterval = null;
+  let playFramePointer = 0;
+  let fps = 12;
+
+  function createBlankFrameUrl() {
+    const c = document.createElement('canvas');
+    c.width = W; c.height = H;
+    const cc = c.getContext('2d');
+    cc.fillStyle = '#fff';
+    cc.fillRect(0, 0, W, H);
+    return c.toDataURL('image/png');
+  }
+
+  function initFrames() {
+    frames = [{ url: createBlankFrameUrl() }];
+    currentFrameIndex = 0;
+    updateFrameStrip();
+  }
+
+  function captureCurrentFrame() {
+    if (!frames[currentFrameIndex]) frames[currentFrameIndex] = {};
+    frames[currentFrameIndex].url = canvas.toDataURL('image/png');
+    frames[currentFrameIndex].img = null;
+  }
+
+  function loadFrameToCanvas(index) {
+    return new Promise((resolve) => {
+      const f = frames[index];
+      if (!f || !f.url) {
+        fillWhite();
+        resolve();
+        return;
+      }
+      const img = new Image();
+      img.onload = () => {
+        ctx.clearRect(0, 0, W, H);
+        ctx.drawImage(img, 0, 0, W, H);
+        f.img = img;
+        resolve();
+      };
+      img.src = f.url;
+    });
+  }
+
+  function renderFrameFast(index) {
+    const f = frames[index];
+    ctx.clearRect(0, 0, W, H);
+    if (f && f.img) {
+      ctx.drawImage(f.img, 0, 0, W, H);
+    } else if (f && f.url) {
+      const img = new Image();
+      img.onload = () => { ctx.clearRect(0,0,W,H); ctx.drawImage(img,0,0,W,H); };
+      img.src = f.url;
+      f.img = img;
+    } else {
+      fillWhite();
+    }
+  }
+
+  function updateFrameStrip() {
+    const strip = $('frameStrip');
+    if (!strip) return;
+    strip.innerHTML = '';
+    frames.forEach((f, i) => {
+      const div = document.createElement('div');
+      div.className = 'frame-thumb' + (i === currentFrameIndex ? ' active' : '');
+      const img = document.createElement('img');
+      img.src = f.url;
+      img.alt = 'Frame ' + (i + 1);
+      div.appendChild(img);
+      const badge = document.createElement('span');
+      badge.textContent = i + 1;
+      div.appendChild(badge);
+      div.addEventListener('click', () => selectFrame(i));
+      strip.appendChild(div);
+    });
+    updateFrameBadge();
+    // Scroll to active thumb
+    const active = strip.querySelector('.frame-thumb.active');
+    if (active) active.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+
+  function updateFrameBadge() {
+    const b = $('frameBadge');
+    if (b) b.textContent = `Frame ${currentFrameIndex + 1}/${frames.length}`;
+  }
+
+  function updateOnionSkin() {
+    const ghost = $('onionGhost');
+    const cb = $('onionToggle');
+    if (!ghost || !cb) return;
+    if (!cb.checked || currentFrameIndex === 0 || !frames[currentFrameIndex - 1]) {
+      ghost.classList.remove('visible');
+      ghost.removeAttribute('src');
+      return;
+    }
+    ghost.src = frames[currentFrameIndex - 1].url;
+    ghost.classList.add('visible');
+  }
+
+  async function selectFrame(index, fromRemote = false) {
+    if (index < 0 || index >= frames.length) return;
+    if (index === currentFrameIndex) return;
+    if (isPlaying) stopPlayback();
+
+    const oldIndex = currentFrameIndex;
+    if (!fromRemote) {
+      captureCurrentFrame();
+      publish({ type: 'frame-update', index: oldIndex, url: frames[oldIndex].url });
+    }
+
+    currentFrameIndex = index;
+    await loadFrameToCanvas(index);
+    updateFrameStrip();
+    updateOnionSkin();
+    updateFrameBadge();
+
+    if (!fromRemote) {
+      publish({ type: 'frame-select', index });
+      addActionRow('Chuyển → frame ' + (index + 1), myId, '#a855f7');
+      scheduleSave();
+    }
+  }
+
+  async function addFrame(duplicate, fromRemote = false, remoteUrl = null) {
+    if (isPlaying) stopPlayback();
+    if (!fromRemote) captureCurrentFrame();
+
+    const insertAt = currentFrameIndex + 1;
+    let url;
+    if (fromRemote && remoteUrl) url = remoteUrl;
+    else if (duplicate && frames[currentFrameIndex]) url = frames[currentFrameIndex].url;
+    else url = createBlankFrameUrl();
+
+    frames.splice(insertAt, 0, { url });
+    currentFrameIndex = insertAt;
+    await loadFrameToCanvas(currentFrameIndex);
+    updateFrameStrip();
+    updateOnionSkin();
+
+    if (!fromRemote) {
+      publish({ type: 'frame-add', index: insertAt, url });
+      addActionRow(duplicate ? 'Nhân bản frame' : 'Thêm frame', myId, '#a855f7');
+      scheduleSave();
+    }
+  }
+
+  async function deleteFrame(fromRemote = false, remoteIndex = null) {
+    if (frames.length <= 1) {
+      if (!fromRemote) logNet('Không thể xoá frame cuối cùng.');
+      return;
+    }
+    if (isPlaying) stopPlayback();
+
+    const deleteAt = (fromRemote && typeof remoteIndex === 'number') ? remoteIndex : currentFrameIndex;
+    if (deleteAt < 0 || deleteAt >= frames.length) return;
+
+    frames.splice(deleteAt, 1);
+    currentFrameIndex = Math.max(0, Math.min(deleteAt, frames.length - 1));
+    await loadFrameToCanvas(currentFrameIndex);
+    updateFrameStrip();
+    updateOnionSkin();
+
+    if (!fromRemote) {
+      publish({ type: 'frame-delete', index: deleteAt });
+      addActionRow('Xoá frame ' + (deleteAt + 1), myId, '#ef4444');
+      scheduleSave();
+    }
+  }
+
+  function prevFrame() { if (currentFrameIndex > 0) selectFrame(currentFrameIndex - 1); }
+  function nextFrame() { if (currentFrameIndex < frames.length - 1) selectFrame(currentFrameIndex + 1); }
+
+  /* =========================================================
+     6. PLAYBACK
+     ========================================================= */
+  function play() {
+    if (frames.length < 2) { logNet('Cần ít nhất 2 frame để phát hoạt hình.'); return; }
+    if (isPlaying) return;
+    captureCurrentFrame();
+    isPlaying = true;
+    playFramePointer = 0;
+
+    $('btnPlay').style.display = 'none';
+    $('btnStop').style.display = '';
+
+    renderFrameFast(playFramePointer);
+    playFramePointer = (playFramePointer + 1) % frames.length;
+    playInterval = setInterval(tick, 1000 / fps);
+    logNet(`▶ Đang phát ${frames.length} frame @ ${fps} fps`);
+    addActionRow('Phát hoạt hình', myId, '#22c55e');
+  }
+
+  function tick() {
+    renderFrameFast(playFramePointer);
+    playFramePointer = (playFramePointer + 1) % frames.length;
+  }
+
+  function stopPlayback() {
+    if (!isPlaying) return;
+    isPlaying = false;
+    clearInterval(playInterval);
+    playInterval = null;
+    $('btnPlay').style.display = '';
+    $('btnStop').style.display = 'none';
+    loadFrameToCanvas(currentFrameIndex);
+    logNet('⏸ Đã dừng phát.');
+  }
+
+  $('fpsInput').addEventListener('input', (e) => {
+    fps = Math.max(1, Math.min(30, Number(e.target.value) || 12));
+    if (isPlaying) {
+      clearInterval(playInterval);
+      playInterval = setInterval(tick, 1000 / fps);
+    }
+  });
+
+  $('onionToggle').addEventListener('change', updateOnionSkin);
+
+  /* =========================================================
+     7. SYNC
      ========================================================= */
   function publish(payload) {
     payload.sender = myId;
-    if (bc) {
-      try { bc.postMessage(payload); } catch (err) { logNet('Lỗi gửi: ' + err.message); }
-    }
+    payload.frame = currentFrameIndex;
+    if (bc) { try { bc.postMessage(payload); } catch (e) {} }
   }
 
   function shapeLabel(t) {
@@ -542,53 +849,60 @@
   function applyRemote(p) {
     if (!p || p.sender === myId) return;
 
+    // ---- Frame-level messages (không phụ thuộc current frame) ----
+    if (p.type === 'frame-select') { selectFrame(p.index, true); return; }
+    if (p.type === 'frame-add')    { addFrame(false, true, p.url); return; }
+    if (p.type === 'frame-delete') { deleteFrame(true, p.index); return; }
+    if (p.type === 'frame-update') {
+      if (p.index == null || p.index >= frames.length) return;
+      if (p.index === currentFrameIndex) return; // không ghi đè frame đang vẽ
+      frames[p.index].url = p.url;
+      frames[p.index].img = null;
+      updateFrameStrip();
+      return;
+    }
+
+    // ---- Draw-level messages: chỉ áp dụng nếu cùng frame ----
+    const drawTypes = ['draw', 'dot', 'spray', 'shape', 'drawend', 'clear', 'image'];
+    if (drawTypes.includes(p.type) && p.frame !== currentFrameIndex) return;
+
     switch (p.type) {
       case 'draw':
         drawStroke(p.x1, p.y1, p.x2, p.y2, p.color, p.size);
         break;
-
       case 'dot':
         drawDot(p.x, p.y, p.color, p.size);
         break;
-
       case 'spray':
         spray(p.x, p.y, p.color, p.size);
         break;
-
       case 'shape':
         drawShape(p.shape, p.x1, p.y1, p.x2, p.y2, p.color, p.size, p.fill);
         addActionRow('Vẽ ' + shapeLabel(p.shape), p.sender, p.color);
-        logNet('Nhận hình từ ' + p.sender);
         break;
-
       case 'drawend':
         addActionRow(p.tool === 'eraser' ? 'Tẩy' : 'Vẽ nét', p.sender, p.color);
         break;
-
       case 'clear':
         fillWhite();
-        addActionRow('Xóa bảng', p.sender, '#ef4444');
-        logNet('Nhận lệnh xóa bảng từ ' + p.sender);
+        addActionRow('Xoá frame', p.sender, '#ef4444');
         break;
-
       case 'image': {
         const img = new Image();
         img.onload = () => {
           ctx.clearRect(0, 0, W, H);
           ctx.drawImage(img, 0, 0, W, H);
+          captureCurrentFrame();
         };
         img.src = p.data;
-        logNet('Đồng bộ ảnh từ ' + p.sender);
         break;
       }
-
       case 'join':
         activeClients.set(p.sender, { id: p.sender, status: 'Đang hoạt động' });
         updateClientTable();
         addActionRow('Tham gia', p.sender, '#22c55e');
         logNet('Client mới tham gia: ' + p.sender);
         break;
-
       case 'leave':
         activeClients.delete(p.sender);
         updateClientTable();
@@ -598,14 +912,13 @@
     }
   }
 
-  if (bc) {
-    bc.onmessage = (event) => applyRemote(event.data);
-  }
+  if (bc) bc.onmessage = (e) => applyRemote(e.data);
 
   /* =========================================================
-     7. SỰ KIỆN VẼ (Pointer Events — chuột + cảm ứng)
+     8. POINTER EVENTS
      ========================================================= */
   function onDown(e) {
+    if (isPlaying) return;
     if (e.pointerType === 'mouse' && e.button !== 0) return;
     e.preventDefault();
     try { canvas.setPointerCapture(e.pointerId); } catch (err) {}
@@ -630,7 +943,7 @@
   }
 
   function onMove(e) {
-    if (!painting) return;
+    if (!painting || isPlaying) return;
     e.preventDefault();
     const p = getPos(e);
 
@@ -640,11 +953,9 @@
       drawStroke(lastX, lastY, p.x, p.y, color, size);
       publish({ type: 'draw', x1: lastX, y1: lastY, x2: p.x, y2: p.y, color, size });
       lastX = p.x; lastY = p.y;
-
     } else if (tool === 'spray') {
       spray(p.x, p.y, currentColor, brushSize);
       publish({ type: 'spray', x: p.x, y: p.y, color: currentColor, size: brushSize });
-
     } else {
       if (!snapshot) return;
       ctx.putImageData(snapshot, 0, 0);
@@ -659,14 +970,8 @@
 
     if (tool === 'pen' || tool === 'eraser') {
       const isEraser = (tool === 'eraser');
-      addActionRow(isEraser ? 'Tẩy' : 'Vẽ nét', myId,
-                   isEraser ? '#94a3b8' : currentColor);
-      publish({
-        type: 'drawend',
-        tool,
-        color: isEraser ? '#ffffff' : currentColor
-      });
-
+      addActionRow(isEraser ? 'Tẩy' : 'Vẽ nét', myId, isEraser ? '#94a3b8' : currentColor);
+      publish({ type: 'drawend', tool, color: isEraser ? '#ffffff' : currentColor });
     } else if (tool === 'line' || tool === 'rect' || tool === 'circle') {
       if (snapshot) ctx.putImageData(snapshot, 0, 0);
       drawShape(tool, startX, startY, lastX, lastY, currentColor, brushSize, fillShapeOn);
@@ -676,11 +981,9 @@
         color: currentColor, size: brushSize, fill: fillShapeOn
       });
       addActionRow('Vẽ ' + shapeLabel(tool), myId, currentColor);
-
     } else if (tool === 'spray') {
       addActionRow('Xịt màu', myId, currentColor);
     }
-
     snapshot = null;
     scheduleSave();
   }
@@ -692,7 +995,7 @@
   canvas.addEventListener('contextmenu', (e) => e.preventDefault());
 
   /* =========================================================
-     8. UI CÔNG CỤ
+     9. UI CÔNG CỤ
      ========================================================= */
   function setTool(t, btnEl) {
     tool = t;
@@ -708,7 +1011,6 @@
     document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
     if (el) el.classList.add('active');
     $('customColor').value = color;
-    // Chọn màu => quay lại bút cho tiện
     if (tool === 'eraser') {
       const penBtn = document.querySelector('.tool-btn[data-tool="pen"]');
       setTool('pen', penBtn);
@@ -731,7 +1033,6 @@
     });
   }
 
-  /* Tạo bảng màu */
   (function buildPalette() {
     const wrap = $('swatches');
     PALETTE.forEach((c, i) => {
@@ -744,68 +1045,86 @@
     });
   })();
 
-  /* Tool buttons */
   document.querySelectorAll('.tool-btn').forEach(btn => {
     btn.addEventListener('click', () => setTool(btn.dataset.tool, btn));
   });
-
-  /* Size buttons */
   document.querySelectorAll('.size-btn').forEach(btn => {
     btn.addEventListener('click', () => setSize(btn.dataset.size, btn));
   });
-
-  /* Custom color */
   $('customColor').addEventListener('input', (e) => {
     setColor(e.target.value, null);
     document.querySelectorAll('.swatch').forEach(s => s.classList.remove('active'));
   });
-
-  /* Fill shape */
-  $('fillShape').addEventListener('change', (e) => {
-    fillShapeOn = e.target.checked;
-  });
+  $('fillShape').addEventListener('change', (e) => { fillShapeOn = e.target.checked; });
 
   /* =========================================================
-     9. HÀNH ĐỘNG BẢNG VẼ
+     10. HÀNH ĐỘNG BẢNG
      ========================================================= */
   function clearBoard() {
+    if (isPlaying) stopPlayback();
     pushHistory();
     fillWhite();
     publish({ type: 'clear' });
-    addActionRow('Xóa bảng', myId, '#ef4444');
-    logNet('Bạn đã xóa bảng vẽ.');
+    addActionRow('Xoá frame hiện tại', myId, '#ef4444');
+    logNet('Đã xoá frame hiện tại.');
     scheduleSave();
   }
 
   function downloadPNG() {
     const a = document.createElement('a');
-    a.download = 'whiteboard-' + Date.now() + '.png';
+    a.download = 'whiteboard-frame-' + (currentFrameIndex + 1) + '-' + Date.now() + '.png';
     a.href = canvas.toDataURL('image/png');
     a.click();
-    addActionRow('Tải PNG', myId, '#22c55e');
-    logNet('Đã tải ảnh bảng vẽ.');
+    addActionRow('Tải PNG frame ' + (currentFrameIndex + 1), myId, '#22c55e');
+    logNet('Đã tải frame hiện tại.');
   }
 
   /* =========================================================
-     10. LƯU CỤC BỘ (debounce)
+     11. LƯU / KHÔI PHỤC
      ========================================================= */
   let saveTimer = null;
   function scheduleSave() {
     clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
+      if (isPlaying) return;
+      captureCurrentFrame();
       try {
-        localStorage.setItem('whiteboard-image', canvas.toDataURL('image/png'));
-      } catch (err) { /* quota */ }
-    }, 700);
+        localStorage.setItem('whiteboard-frames', JSON.stringify({
+          frames: frames.map(f => ({ url: f.url })),
+          current: currentFrameIndex
+        }));
+      } catch (e) {}
+    }, 800);
+  }
+
+  async function restoreFrames() {
+    const saved = localStorage.getItem('whiteboard-frames');
+    if (!saved) return;
+    try {
+      const data = JSON.parse(saved);
+      if (Array.isArray(data.frames) && data.frames.length) {
+        frames = data.frames.map(f => ({ url: f.url }));
+        currentFrameIndex = Math.min(Math.max(0, data.current || 0), frames.length - 1);
+        await loadFrameToCanvas(currentFrameIndex);
+        updateFrameStrip();
+        updateOnionSkin();
+        logNet('Đã khôi phục ' + frames.length + ' frame từ localStorage.');
+      }
+    } catch (e) {}
   }
 
   /* =========================================================
-     11. PHÍM TẮT
+     12. PHÍM TẮT
      ========================================================= */
   document.addEventListener('keydown', (e) => {
     const tag = (e.target.tagName || '').toLowerCase();
     if (tag === 'input' || tag === 'textarea') return;
 
+    if (e.code === 'Space') {
+      e.preventDefault();
+      isPlaying ? stopPlayback() : play();
+      return;
+    }
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
       e.preventDefault();
       if (e.shiftKey) redo(); else undo();
@@ -814,43 +1133,32 @@
     if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y') {
       e.preventDefault(); redo(); return;
     }
-
     const map = { b: 'pen', e: 'eraser', l: 'line', r: 'rect', c: 'circle', s: 'spray' };
     const k = e.key.toLowerCase();
     if (map[k]) {
       const btn = document.querySelector(`.tool-btn[data-tool="${map[k]}"]`);
       setTool(map[k], btn);
     }
+    if (e.key === 'ArrowLeft')  { e.preventDefault(); prevFrame(); }
+    if (e.key === 'ArrowRight') { e.preventDefault(); nextFrame(); }
   });
 
   /* =========================================================
-     12. KHỞI ĐỘNG
+     13. KHỞI ĐỘNG
      ========================================================= */
   fillWhite();
-
-  /* Khôi phục bản vẽ đã lưu */
-  (function restore() {
-    const saved = localStorage.getItem('whiteboard-image');
-    if (!saved) return;
-    const img = new Image();
-    img.onload = () => {
-      ctx.clearRect(0, 0, W, H);
-      ctx.drawImage(img, 0, 0, W, H);
-      logNet('Đã khôi phục bản vẽ trước đó từ localStorage.');
-    };
-    img.src = saved;
-  })();
+  initFrames();
+  restoreFrames();
 
   updateClientTable();
   setSize(4, document.querySelector('.size-btn[data-size="4"]'));
 
-  /* Thông báo tham gia phòng */
   publish({ type: 'join' });
   window.addEventListener('beforeunload', () => publish({ type: 'leave' }));
 
   logNet('Sẵn sàng. Client: ' + myId);
-  logNet('Phím tắt: B=bút, E=tẩy, L=đường, R=chữ nhật, C=tròn, S=xịt, Ctrl+Z/Ctrl+Y.');
-  logNet('Lưu ý: BroadcastChannel chỉ đồng bộ trong CÙNG trình duyệt. Muốn nhiều thiết bị cần backend (Supabase/Firebase/WebSocket).');
+  logNet('Phím tắt: Space = Phát/Dừng • ←/→ = Frame trước/sau • Ctrl+Z / Ctrl+Y = Undo/Redo');
+  logNet('Mẹo: Bật Onion skin để thấy frame trước mờ phía sau, tiện vẽ chuyển động.');
   </script>
 </body>
 </html>
